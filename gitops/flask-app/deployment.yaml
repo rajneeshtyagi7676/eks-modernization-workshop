@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-gitops
+  namespace: flask-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-gitops
+  template:
+    metadata:
+      labels:
+        app: flask-gitops
+    spec:
+      containers:
+      - name: flask
+        image: 813274479812.dkr.ecr.us-west-2.amazonaws.com/legacy-flask-app:v1.2
+        ports:
+        - containerPort: 8000
+        command: ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-gitops-svc
+  namespace: flask-demo
+spec:
+  selector:
+    app: flask-gitops
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: LoadBalancer
