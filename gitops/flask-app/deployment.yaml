@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: flask
-        image: 813274479812.dkr.ecr.us-west-2.amazonaws.com/legacy-flask-app:v1.2
+        image: 839507877817.dkr.ecr.us-west-2.amazonaws.com/legacy-flask-app:v1.2
         ports:
         - containerPort: 8000
         command: ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
