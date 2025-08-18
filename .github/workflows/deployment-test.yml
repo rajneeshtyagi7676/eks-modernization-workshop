@@ -1,0 +1,80 @@
+name: Deployment Validation
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+
+jobs:
+  validate-deployment:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region us-west-2 --name modernization-workshop
+
+    - name: Wait for deployment
+      run: |
+        kubectl rollout status deployment/flask-app -n flask-app --timeout=300s
+
+    - name: Run smoke tests
+      run: |
+        # Get ALB DNS name
+        ALB_DNS=$(kubectl get ingress -n flask-app flask-app-flask-app-chart -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        
+        # Wait for ALB to be ready
+        echo "Waiting for ALB to be ready..."
+        for i in {1..30}; do
+          if curl -f -s http://$ALB_DNS/health > /dev/null; then
+            echo "ALB is ready"
+            break
+          fi
+          echo "Attempt $i/30: ALB not ready, waiting..."
+          sleep 10
+        done
+        
+        # Run smoke tests
+        echo "Running smoke tests..."
+        curl -f http://$ALB_DNS/health
+        curl -f http://$ALB_DNS/ready
+        curl -f http://$ALB_DNS/
+
+    - name: Performance test
+      run: |
+        ALB_DNS=$(kubectl get ingress -n flask-app flask-app-flask-app-chart -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        
+        # Simple load test with curl
+        echo "Running performance test..."
+        for i in {1..10}; do
+          curl -w "@curl-format.txt" -o /dev/null -s http://$ALB_DNS/ &
+        done
+        wait
+        
+        echo "Performance test completed"
+
+    - name: Create curl format file
+      run: |
+        cat > curl-format.txt << 'EOF'
+        time_namelookup:  %{time_namelookup}\n
+        time_connect:     %{time_connect}\n
+        time_appconnect:  %{time_appconnect}\n
+        time_pretransfer: %{time_pretransfer}\n
+        time_redirect:    %{time_redirect}\n
+        time_starttransfer: %{time_starttransfer}\n
+        ----------\n
+        time_total:       %{time_total}\n
+        EOF
