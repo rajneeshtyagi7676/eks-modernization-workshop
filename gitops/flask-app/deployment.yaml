@@ -1,0 +1,45 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-gitops
+  namespace: flask-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-gitops
+  template:
+    metadata:
+      labels:
+        app: flask-gitops
+        version: "v1.0"
+    spec:
+      containers:
+      - name: flask-app
+        image: 607993703897.dkr.ecr.us-east-1.amazonaws.com/legacy-ecommerce-app:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PORT
+          value: "8000"
+        envFrom:
+        - configMapRef:
+            name: app-config
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 5
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
