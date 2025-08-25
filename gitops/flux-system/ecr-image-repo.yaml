@@ -1,0 +1,11 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: testingworkshop
+  namespace: flux-system
+spec:
+  image: <repository>
+  interval: 30s
+  provider: aws
+  secretRef:
+    name: ecr-secret

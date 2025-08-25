@@ -1,11 +1,10 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flask-gitops
   namespace: flask-demo
 spec:
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       app: flask-gitops
@@ -17,7 +16,7 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: 607993703897.dkr.ecr.us-east-1.amazonaws.com/legacy-ecommerce-app:latest
+        image: <repository>:latest
         ports:
         - containerPort: 8000
         env:

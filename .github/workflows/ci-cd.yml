@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: legacy-ecommerce-app
-  CLUSTER_NAME: workshop-eks-cluster
+  CLUSTER_NAME: modernization-workshop
 
 jobs:
   build-and-push:
@@ -59,7 +59,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
-        sed -i "s|image: .*|image: $ECR_REGISTRY/legacy-ecommerce-app:${{ github.sha }} # {\"$imagepolicy\": \"flux-system:testingworkshop\"}|" gitops/flask-app/deployment.yaml
+        sed -i "s|image: .*|image: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} # {\"$imagepolicy\": \"flux-system:testingworkshop\"}|" gitops/flask-app/deployment.yaml
         git add gitops/flask-app/deployment.yaml
         git commit -m "Update deployment image to ${{ github.sha }}"
         git push
