@@ -9,4 +9,4 @@ spec:
     branch: main
   secretRef:
     name: github-auth
-  url: https://github.com/YOUR_USERNAME/YOUR_REPO
+  url: https://github.com/$GITHUB_USERNAME/$GITHUB_REPO
