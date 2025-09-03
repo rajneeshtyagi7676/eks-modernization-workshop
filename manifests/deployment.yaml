@@ -4,7 +4,7 @@ metadata:
   name: flask-gitops
   namespace: flask-demo
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: flask-gitops
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: 607993703897.dkr.ecr.us-east-1.amazonaws.com/legacy-ecommerce-app:v1.0.0 # {"$imagepolicy": "flux-system:flask-app"}
+        image: 839507877817.dkr.ecr.us-west-2.amazonaws.com/legacy-ecommerce-app:v1.0.0 # {"$imagepolicy": "flux-system:flask-app"}
         ports:
         - containerPort: 8000
         env:
