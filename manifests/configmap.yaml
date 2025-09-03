@@ -4,7 +4,7 @@ metadata:
   name: app-config
   namespace: flask-demo
 data:
-  ENABLE_CART: "false"
+  ENABLE_CART: "true"
   ENABLE_RECOMMENDATIONS: "false"
   MAX_ITEMS_PER_PAGE: "20"
   CACHE_TIMEOUT: "300"
